@@ -1,5 +1,11 @@
 package com.hadoop.webHDFS;
 
+import static com.hadoop.common.properties.Constants.ERROR;
+import static com.hadoop.common.properties.Constants.SOURCE_URL;
+import static com.hadoop.common.properties.Constants.DESTINATION_URL;
+import static com.hadoop.common.properties.Constants.LOG;
+
+import java.io.File;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -7,7 +13,6 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 import com.hadoop.common.properties.CommonProperties;
-import static com.hadoop.common.properties.Constants.ERROR;
 
 /**
  * HDFS FTP Utilities
@@ -52,7 +57,40 @@ public class HadoopDFSFTP {
 			if (args.length < 5) {
 				String msg = "Mandatory Arguments are missing";
 				log.error(ERROR +msg);
+				return;
 			}
+			
+			/*
+			 * Check for any concrete path
+			 */
+			
+			if(args.length == 7){
+				sourcePath = args[5];
+				targetPath = args[6];
+			}
+			
+			/*
+			 * check for any source path concrete path from ENV file
+			 */
+			if(sourcePath == null || (sourcePath != null && sourcePath.trim().length() < 1)){
+				sourcePath = propMap.get(process+"."+sourceName + SOURCE_URL);
+			}
+			
+			/*
+			 * check for any target path concrete path from ENV file
+			 */
+			if(targetPath == null || (targetPath != null && targetPath.trim().length() < 1)){
+				targetPath = propMap.get(process+"."+sourceName + DESTINATION_URL);
+			}
+			
+			if(!LOG.equalsIgnoreCase(sourceName)){
+				
+				if(process.equals("push")){
+					sourcePath = sourcePath + File.separator + fileName;
+				}
+			}
+			
+			log.info("sourcePath:" + sourcePath);
 			
 		} catch (Throwable e) {
 			
